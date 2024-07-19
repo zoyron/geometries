@@ -58,7 +58,7 @@ texture.colorSpace = THREE.SRGBColorSpace;
  * dodecahedron
  */
 
-let dodecahedronGeometry = new THREE.DodecahedronGeometry(10);
+let dodecahedronGeometry = new THREE.DodecahedronGeometry(14, 2);
 dodecahedronGeometry.deleteAttribute("normal");
 dodecahedronGeometry.deleteAttribute("uv");
 dodecahedronGeometry = BufferGeometryUtils.mergeVertices(dodecahedronGeometry);
@@ -75,10 +75,10 @@ for (let i = 0; i < positions.count; i++) {
  * points material and stuff
  */
 const pointsMaterial = new THREE.PointsMaterial({
-  color: 0x0080ff,
+  color: 0xff8000,
   map: texture,
-  size: 1,
-  alphaTest: 0.5,
+  size: 0.5,
+  alphaTest: 1,
 });
 
 const pointsGeometry = new THREE.BufferGeometry().setFromPoints(vertices);
@@ -90,7 +90,7 @@ scene.add(points);
  */
 const convexGeometry = new ConvexGeometry(vertices);
 const convexMaterial = new THREE.MeshLambertMaterial({
-  color: 0xff0000,
+  color: 0x0080ff,
   opacity: 0.25,
   side: THREE.DoubleSide,
   transparent: true,
