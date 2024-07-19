@@ -1,5 +1,11 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import GUI from "lil-gui";
+
+/**
+ * debug - gui pannel
+ */
+const gui = new GUI();
 
 /**
  * Base
@@ -14,10 +20,18 @@ const scene = new THREE.Scene();
 const geometry = new THREE.BoxGeometry(1, 1, 1, 4, 4, 4);
 const material = new THREE.MeshBasicMaterial({
   color: 0x00ff00,
-  wireframe: true,
 });
 const mesh = new THREE.Mesh(geometry, material);
 scene.add(mesh);
+/**
+ * gui controls
+ * with lil-gui, you can only modify the properties of the object
+ * for example, in the object mesh.position, the properties are x,y and x
+ * you can modify them since they are properties.
+ * You can modify other properties as well
+ */
+gui.add(mesh.position, "y", -2, 2, 0.01);
+gui.add(material, "wireframe");
 
 // Sizes
 const sizes = {
