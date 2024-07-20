@@ -83,7 +83,7 @@ const pointsMaterial = new THREE.PointsMaterial({
 
 const pointsGeometry = new THREE.BufferGeometry().setFromPoints(vertices);
 const points = new THREE.Points(pointsGeometry, pointsMaterial);
-scene.add(points);
+// scene.add(points);
 
 /**
  * adding the convex hull
@@ -91,13 +91,35 @@ scene.add(points);
 const convexGeometry = new ConvexGeometry(vertices);
 const convexMaterial = new THREE.MeshLambertMaterial({
   color: 0x0080ff,
-  opacity: 0.25,
+  opacity: 0.75,
   side: THREE.DoubleSide,
   transparent: true,
 });
 const mesh = new THREE.Mesh(convexGeometry, convexMaterial);
 scene.add(mesh);
 camera.lookAt(mesh.position);
+
+/**
+ * bounding sphere of the Convex hull
+ */
+convexGeometry.computeBoundingSphere();
+const boundingSphere = convexGeometry.boundingSphere;
+const boundingSphereGeometry = new THREE.SphereGeometry(
+  boundingSphere.radius,
+  64,
+  64
+);
+const boundingSphereMaterial = new THREE.PointsMaterial({
+  color: 0xff8000,
+  size: 0.1,
+});
+
+const boundingSphereMesh = new THREE.Points(
+  boundingSphereGeometry,
+  boundingSphereMaterial
+);
+scene.add(boundingSphereMesh);
+
 /**
  * resize window
  */
@@ -122,7 +144,7 @@ window.addEventListener("resize", () => {
 const animate = () => {
   mesh.rotation.y += 0.005;
   points.rotation.y += 0.005;
-
+  boundingSphereMesh.rotation.y += 0.005;
   renderer.render(scene, camera);
   window.requestAnimationFrame(animate);
 };
