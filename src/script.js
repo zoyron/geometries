@@ -36,7 +36,7 @@ scene.add(camera);
 /**
  * lights
  */
-const light = new THREE.PointLight(0xffffff, 3, 0, 0);
+const light = new THREE.PointLight(0xffffff, 4, 0, 0);
 camera.add(light);
 
 /**
@@ -58,7 +58,7 @@ texture.colorSpace = THREE.SRGBColorSpace;
  * dodecahedron
  */
 
-let dodecahedronGeometry = new THREE.DodecahedronGeometry(14, 2);
+let dodecahedronGeometry = new THREE.DodecahedronGeometry(14, 5);
 dodecahedronGeometry.deleteAttribute("normal");
 dodecahedronGeometry.deleteAttribute("uv");
 dodecahedronGeometry = BufferGeometryUtils.mergeVertices(dodecahedronGeometry);
@@ -81,16 +81,21 @@ const pointsMaterial = new THREE.PointsMaterial({
   alphaTest: 1,
 });
 
-const pointsGeometry = new THREE.BufferGeometry().setFromPoints(vertices);
+// const pointsGeometry = new THREE.BufferGeometry().setFromPoints(vertices);
+const pointsGeometry = new THREE.BufferGeometry().setAttribute(
+  "position",
+  new THREE.BufferAttribute(positions.array, 3)
+);
 const points = new THREE.Points(pointsGeometry, pointsMaterial);
+
 // scene.add(points);
 
 /**
  * adding the convex hull
  */
 const convexGeometry = new ConvexGeometry(vertices);
-const convexMaterial = new THREE.MeshLambertMaterial({
-  color: 0x0080ff,
+const convexMaterial = new THREE.MeshNormalMaterial({
+  // color: 0x0080ff,
   opacity: 0.75,
   side: THREE.DoubleSide,
   transparent: true,
@@ -102,23 +107,23 @@ camera.lookAt(mesh.position);
 /**
  * bounding sphere of the Convex hull
  */
-convexGeometry.computeBoundingSphere();
-const boundingSphere = convexGeometry.boundingSphere;
-const boundingSphereGeometry = new THREE.SphereGeometry(
-  boundingSphere.radius,
-  64,
-  64
-);
-const boundingSphereMaterial = new THREE.PointsMaterial({
-  color: 0xff8000,
-  size: 0.1,
-});
+// convexGeometry.computeBoundingSphere();
+// const boundingSphere = convexGeometry.boundingSphere;
+// const boundingSphereGeometry = new THREE.SphereGeometry(
+//   boundingSphere.radius,
+//   64,
+//   64
+// );
+// const boundingSphereMaterial = new THREE.PointsMaterial({
+//   color: 0xff8000,
+//   size: 0.1,
+// });
 
-const boundingSphereMesh = new THREE.Points(
-  boundingSphereGeometry,
-  boundingSphereMaterial
-);
-scene.add(boundingSphereMesh);
+// const boundingSphereMesh = new THREE.Points(
+//   boundingSphereGeometry,
+//   boundingSphereMaterial
+// );
+// scene.add(boundingSphereMesh);
 
 /**
  * resize window
@@ -144,7 +149,7 @@ window.addEventListener("resize", () => {
 const animate = () => {
   mesh.rotation.y += 0.005;
   points.rotation.y += 0.005;
-  boundingSphereMesh.rotation.y += 0.005;
+  // boundingSphereMesh.rotation.y += 0.005;
   renderer.render(scene, camera);
   window.requestAnimationFrame(animate);
 };
