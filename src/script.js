@@ -58,9 +58,7 @@ texture.colorSpace = THREE.SRGBColorSpace;
  * dodecahedron
  */
 
-let dodecahedronGeometry = new THREE.DodecahedronGeometry(14, 5);
-dodecahedronGeometry.deleteAttribute("normal");
-dodecahedronGeometry.deleteAttribute("uv");
+let dodecahedronGeometry = new THREE.IcosahedronGeometry(14, 1);
 dodecahedronGeometry = BufferGeometryUtils.mergeVertices(dodecahedronGeometry);
 
 const positions = dodecahedronGeometry.getAttribute("position");
@@ -88,20 +86,21 @@ const pointsGeometry = new THREE.BufferGeometry().setAttribute(
 );
 const points = new THREE.Points(pointsGeometry, pointsMaterial);
 
-// scene.add(points);
+scene.add(points);
 
 /**
  * adding the convex hull
  */
 const convexGeometry = new ConvexGeometry(vertices);
-const convexMaterial = new THREE.MeshNormalMaterial({
-  // color: 0x0080ff,
+const convexMaterial = new THREE.MeshLambertMaterial({
+  color: 0x0080ff,
   opacity: 0.75,
-  side: THREE.DoubleSide,
+  // side: THREE.DoubleSide,
   transparent: true,
 });
 const mesh = new THREE.Mesh(convexGeometry, convexMaterial);
 scene.add(mesh);
+// scene.add(new THREE.AxesHelper(24));
 camera.lookAt(mesh.position);
 
 /**
@@ -111,8 +110,8 @@ camera.lookAt(mesh.position);
 // const boundingSphere = convexGeometry.boundingSphere;
 // const boundingSphereGeometry = new THREE.SphereGeometry(
 //   boundingSphere.radius,
-//   64,
-//   64
+//   16,
+//   16
 // );
 // const boundingSphereMaterial = new THREE.PointsMaterial({
 //   color: 0xff8000,
