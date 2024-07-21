@@ -1,157 +1,152 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import { ConvexGeometry } from "three/addons/geometries/ConvexGeometry.js";
-import * as BufferGeometryUtils from "three/addons/utils/BufferGeometryUtils.js";
-import disc from "../static/disc.png";
-
-let camera, scene, renderer;
-const canvas = document.querySelector("canvas.webgl");
+import GUI from "lil-gui";
 
 /**
- * setting the basic scene
+ * Debug
  */
-scene = new THREE.Scene();
-scene.background = new THREE.Color(0xaaccff);
+const gui = new GUI();
 
-// sizes
+/**
+ * Base
+ */
+// Canvas
+const canvas = document.querySelector("canvas.webgl");
+
+// Scene
+const scene = new THREE.Scene();
+
+/**
+ * Textures
+ */
+const textureLoader = new THREE.TextureLoader();
+const cubeTextureLoader = new THREE.CubeTextureLoader();
+
+const environmentMapTexture = cubeTextureLoader.load([
+  "/textures/environmentMaps/0/px.png",
+  "/textures/environmentMaps/0/nx.png",
+  "/textures/environmentMaps/0/py.png",
+  "/textures/environmentMaps/0/ny.png",
+  "/textures/environmentMaps/0/pz.png",
+  "/textures/environmentMaps/0/nz.png",
+]);
+
+/**
+ * Test sphere
+ */
+const sphere = new THREE.Mesh(
+  new THREE.SphereGeometry(0.5, 32, 32),
+  new THREE.MeshStandardMaterial({
+    metalness: 0.3,
+    roughness: 0.4,
+    envMap: environmentMapTexture,
+    envMapIntensity: 0.5,
+  })
+);
+sphere.castShadow = true;
+sphere.position.y = 0.5;
+scene.add(sphere);
+
+/**
+ * Floor
+ */
+const floor = new THREE.Mesh(
+  new THREE.PlaneGeometry(10, 10),
+  new THREE.MeshStandardMaterial({
+    color: "#777777",
+    metalness: 0.3,
+    roughness: 0.4,
+    envMap: environmentMapTexture,
+    envMapIntensity: 0.5,
+  })
+);
+floor.receiveShadow = true;
+floor.rotation.x = -Math.PI * 0.5;
+scene.add(floor);
+
+/**
+ * Lights
+ */
+const ambientLight = new THREE.AmbientLight(0xffffff, 2.1);
+scene.add(ambientLight);
+
+const directionalLight = new THREE.DirectionalLight(0xffffff, 0.6);
+directionalLight.castShadow = true;
+directionalLight.shadow.mapSize.set(1024, 1024);
+directionalLight.shadow.camera.far = 15;
+directionalLight.shadow.camera.left = -7;
+directionalLight.shadow.camera.top = 7;
+directionalLight.shadow.camera.right = 7;
+directionalLight.shadow.camera.bottom = -7;
+directionalLight.position.set(5, 5, 5);
+scene.add(directionalLight);
+
+/**
+ * Sizes
+ */
 const sizes = {
   width: window.innerWidth,
   height: window.innerHeight,
 };
 
-// setting up the renderer
-renderer = new THREE.WebGLRenderer({
-  canvas: canvas,
-});
-
-renderer.setSize(sizes.width, sizes.height);
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-
-/**
- * camera
- */
-camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 1000);
-camera.position.set(12, 25, 20);
-scene.add(camera);
-
-/**
- * lights
- */
-const light = new THREE.PointLight(0xffffff, 4, 0, 0);
-camera.add(light);
-
-/**
- * controlls - orbital controls
- */
-const controls = new OrbitControls(camera, canvas);
-controls.enableDamping = true;
-controls.minDistance = 20;
-controls.maxDistance = 50;
-controls.maxPolarAngle = Math.PI / 2;
-/**
- * texture
- */
-const loader = new THREE.TextureLoader();
-const texture = loader.load(disc);
-texture.colorSpace = THREE.SRGBColorSpace;
-
-/**
- * dodecahedron
- */
-
-let dodecahedronGeometry = new THREE.IcosahedronGeometry(14, 1);
-dodecahedronGeometry = BufferGeometryUtils.mergeVertices(dodecahedronGeometry);
-
-const positions = dodecahedronGeometry.getAttribute("position");
-const vertices = [];
-for (let i = 0; i < positions.count; i++) {
-  const vertex = new THREE.Vector3();
-  vertex.fromBufferAttribute(positions, i);
-  vertices.push(vertex);
-}
-
-/**
- * points material and stuff
- */
-const pointsMaterial = new THREE.PointsMaterial({
-  color: 0xff8000,
-  map: texture,
-  size: 0.5,
-  alphaTest: 1,
-});
-
-// const pointsGeometry = new THREE.BufferGeometry().setFromPoints(vertices);
-const pointsGeometry = new THREE.BufferGeometry().setAttribute(
-  "position",
-  new THREE.BufferAttribute(positions.array, 3)
-);
-const points = new THREE.Points(pointsGeometry, pointsMaterial);
-
-scene.add(points);
-
-/**
- * adding the convex hull
- */
-const convexGeometry = new ConvexGeometry(vertices);
-const convexMaterial = new THREE.MeshLambertMaterial({
-  color: 0x0080ff,
-  opacity: 0.75,
-  // side: THREE.DoubleSide,
-  transparent: true,
-});
-const mesh = new THREE.Mesh(convexGeometry, convexMaterial);
-scene.add(mesh);
-// scene.add(new THREE.AxesHelper(24));
-camera.lookAt(mesh.position);
-
-/**
- * bounding sphere of the Convex hull
- */
-// convexGeometry.computeBoundingSphere();
-// const boundingSphere = convexGeometry.boundingSphere;
-// const boundingSphereGeometry = new THREE.SphereGeometry(
-//   boundingSphere.radius,
-//   16,
-//   16
-// );
-// const boundingSphereMaterial = new THREE.PointsMaterial({
-//   color: 0xff8000,
-//   size: 0.1,
-// });
-
-// const boundingSphereMesh = new THREE.Points(
-//   boundingSphereGeometry,
-//   boundingSphereMaterial
-// );
-// scene.add(boundingSphereMesh);
-
-/**
- * resize window
- */
 window.addEventListener("resize", () => {
+  // Update sizes
   sizes.width = window.innerWidth;
   sizes.height = window.innerHeight;
 
-  // update the camera
+  // Update camera
   camera.aspect = sizes.width / sizes.height;
-
-  // update projection matrix
   camera.updateProjectionMatrix();
 
-  // update the renderer after resizing the page
+  // Update renderer
   renderer.setSize(sizes.width, sizes.height);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 });
 
 /**
- * animation
+ * Camera
  */
-const animate = () => {
-  mesh.rotation.y += 0.005;
-  points.rotation.y += 0.005;
-  // boundingSphereMesh.rotation.y += 0.005;
+// Base camera
+const camera = new THREE.PerspectiveCamera(
+  75,
+  sizes.width / sizes.height,
+  0.1,
+  100
+);
+camera.position.set(-3, 3, 3);
+scene.add(camera);
+
+// Controls
+const controls = new OrbitControls(camera, canvas);
+controls.enableDamping = true;
+
+/**
+ * Renderer
+ */
+const renderer = new THREE.WebGLRenderer({
+  canvas: canvas,
+});
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.setSize(sizes.width, sizes.height);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+/**
+ * Animate
+ */
+const clock = new THREE.Clock();
+
+const tick = () => {
+  const elapsedTime = clock.getElapsedTime();
+
+  // Update controls
+  controls.update();
+
+  // Render
   renderer.render(scene, camera);
-  window.requestAnimationFrame(animate);
+
+  // Call tick again on the next frame
+  window.requestAnimationFrame(tick);
 };
 
-animate();
+tick();
