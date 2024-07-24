@@ -55,6 +55,7 @@ const floor = new THREE.Mesh(
   new THREE.MeshStandardMaterial({
     color: "#777777",
     metalness: 0.3,
+    side: THREE.DoubleSide,
     roughness: 0.4,
     envMap: environmentMapTexture,
     envMapIntensity: 0.5,
@@ -136,7 +137,7 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
  */
 const clock = new THREE.Clock();
 
-const tick = () => {
+const animate = () => {
   const elapsedTime = clock.getElapsedTime();
 
   // Update controls
@@ -145,8 +146,8 @@ const tick = () => {
   // Render
   renderer.render(scene, camera);
 
-  // Call tick again on the next frame
-  window.requestAnimationFrame(tick);
+  // Call animate again on the next frame
+  window.requestAnimationFrame(animate);
 };
 
-tick();
+animate();
